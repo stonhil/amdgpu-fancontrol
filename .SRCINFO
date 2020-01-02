@@ -9,9 +9,8 @@ pkgbase = amdgpu-fancontrol
 	source = amdgpu-fancontrol
 	source = amdgpu-fancontrol.service
 	source = etc-amdgpu-fancontrol.cfg
-	sha256sums = 5196ae002dfe36c1543c289b255f611b76212fd84c5e22b92d5849c3a4021358
+	sha256sums = 7bb88878b6b64d3064cfa23120d8e038181c76639a940dfe0ab6c882c970d5c9
 	sha256sums = 509d5c2676ea0aa23918bebd1b4f5f0268b0a6a68a27650ce487dfb58f27e70c
 	sha256sums = 0a032a9fe2c1c6f985e898eb84b5ae658e08146038f44f7ed4a09400e7f06d39
 
 pkgname = amdgpu-fancontrol
-
