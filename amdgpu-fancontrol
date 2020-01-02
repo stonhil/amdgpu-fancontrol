@@ -16,15 +16,21 @@ FILE_TEMP=$(echo /sys/class/drm/card0/device/hwmon/hwmon?/temp1_input)
 #FILE_TEMP_CRIT=$(echo /sys/class/hwmon/hwmon?/temp1_crit_hyst)
 [[ -f "$FILE_PWM" && -f "$FILE_FANMODE" && -f "$FILE_TEMP" ]] || { echo "invalid hwmon files" ; exit 1; }
 
-# load configuration file if present
-[ -f /etc/amdgpu-fancontrol.cfg ] && . /etc/amdgpu-fancontrol.cfg
+# note: does not exit, instead returns non-zero on temps/pwms mismatch
+function load_config {
+  # load configuration file if present
+  [ -f /etc/amdgpu-fancontrol.cfg ] && . /etc/amdgpu-fancontrol.cfg
 
-# check if amount of temps and pwm values match
-if [ "${#TEMPS[@]}" -ne "${#PWMS[@]}" ]
-then
-  echo "Amount of temperature and pwm values does not match"
-  exit 1
-fi
+  # check if amount of temps and pwm values match
+  if [ "${#TEMPS[@]}" -ne "${#PWMS[@]}" ]
+  then
+    echo "Amount of temperature and pwm values does not match"
+    return 1
+  fi
+}
+
+# exit early on bad config
+load_config || exit 1
 
 # checking for privileges
 if [ $UID -ne 0 ]
@@ -109,6 +115,9 @@ function reset_on_fail {
 # always try to reset fans on exit
 trap "reset_on_fail" SIGINT SIGTERM
 
+# reload config on user signal, fans should be reset at this point
+trap "load_config || reset_on_fail" SIGUSR1
+
 function run_daemon {
   while :; do
     interpolate_pwm
@@ -122,4 +131,3 @@ set_fanmode 1
 
 # finally start the loop
 run_daemon
-
